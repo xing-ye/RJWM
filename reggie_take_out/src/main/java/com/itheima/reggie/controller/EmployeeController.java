@@ -1,19 +1,22 @@
 package com.itheima.reggie.controller;
 
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
+import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.itheima.reggie.common.R;
 import com.itheima.reggie.entity.Employee;
 import com.itheima.reggie.service.EmployeeService;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.lang.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.util.DigestUtils;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 import javax.servlet.http.HttpServletRequest;
+import java.time.LocalDateTime;
 
+/**
+ * @RestController是@ResponseBody和@Controller的组合注解。
+ */
 @Slf4j
 @RestController
 @RequestMapping("/employee") //通过这样，前端可以通过/employee来访问employee的相关方法
@@ -75,6 +78,56 @@ public class EmployeeController {
         return R.success("退出成功");
     }
 
+    /**
+     * 新增员工
+     * 这里mapping不设置地址是因为，前端那里保存只访问到 /employee即可
+     * @param employee
+     * @return
+     */
+    @PostMapping
+    public R<String> save(HttpServletRequest request,@RequestBody Employee employee){
+        log.info("新增员工信息：{}",employee.toString());
+        //设置初始密码123456，使用MD5加密
+        employee.setPassword(DigestUtils.md5DigestAsHex("123456".getBytes()));
+        employee.setCreateTime(LocalDateTime.now());// 设置用户创建时间
+        employee.setUpdateTime(LocalDateTime.now());//设置更新时间
+        Long employeeId= (Long) request.getSession().getAttribute("employee");
+        // 获取登录者id，跟当时放入session中的名字要对应
+        employee.setCreateUser(employeeId);//设置创建人id
+        employee.setUpdateUser(employeeId);//设置更新人
+        employeeService.save(employee);
+        return  R.success("新增员工成功！");
+    }
 
+    /**
+     * 员工信息分页查询
+     * @param page
+     * @param pageSize
+     * @param name
+     * @return
+     */
+    @GetMapping("/page")
+    public R<Page> page(int page,int pageSize,String name){
+        log.info("page={},pageSize={},name={}",page,pageSize,name);
+        // 构造分页构造器
+        Page pageinfo=new Page(page,pageSize);
+
+
+        //构造条件构造器，如果需要使用name
+        LambdaQueryWrapper<Employee> queryWrapper=new LambdaQueryWrapper();
+        //添加一个过滤条件
+        /**
+         * 这里需要注意，StringUtils.isNotEmpty判断name不为空后才会进行比较，也可以没有这个
+         * StringUtils的包是org.apache.commons.lang
+         */
+        queryWrapper.like(StringUtils.isNotEmpty(name),Employee::getName,name);
+        //添加一个排序条件,按照更新时间进行排序，ByDesc代表降序排序
+        queryWrapper.orderByDesc(Employee::getUpdateTime);
+
+        //执行查询,按照pageinfo的要求进行分页查询,这里不需要一个返回值，会自动的放入pageinfo里
+        employeeService.page(pageinfo,queryWrapper);
+
+        return R.success(pageinfo);
+    }
 
 }
