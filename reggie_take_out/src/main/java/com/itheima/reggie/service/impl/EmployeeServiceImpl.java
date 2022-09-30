@@ -6,6 +6,9 @@ import com.itheima.reggie.mapper.EmployeeMapper;
 import com.itheima.reggie.service.EmployeeService;
 import org.springframework.stereotype.Service;
 
+/**
+ * Service用于业务层，用于声明给spring控制
+ */
 @Service
 public class EmployeeServiceImpl extends ServiceImpl<EmployeeMapper, Employee> implements EmployeeService {
 

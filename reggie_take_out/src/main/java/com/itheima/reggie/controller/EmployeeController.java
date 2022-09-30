@@ -6,6 +6,7 @@ import com.itheima.reggie.common.R;
 import com.itheima.reggie.entity.Employee;
 import com.itheima.reggie.service.EmployeeService;
 import lombok.extern.slf4j.Slf4j;
+import lombok.val;
 import org.apache.commons.lang.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.util.DigestUtils;
@@ -16,6 +17,7 @@ import java.time.LocalDateTime;
 
 /**
  * @RestController是@ResponseBody和@Controller的组合注解。
+ * Controller用于控制层，交付spring管理
  */
 @Slf4j
 @RestController
@@ -89,12 +91,16 @@ public class EmployeeController {
         log.info("新增员工信息：{}",employee.toString());
         //设置初始密码123456，使用MD5加密
         employee.setPassword(DigestUtils.md5DigestAsHex("123456".getBytes()));
-        employee.setCreateTime(LocalDateTime.now());// 设置用户创建时间
-        employee.setUpdateTime(LocalDateTime.now());//设置更新时间
         Long employeeId= (Long) request.getSession().getAttribute("employee");
+        /**
+         * 这里使用自动填充去添加：首先Employee要设置填充声明，然后通过MyMetaObjectHandler 实现
+        * employee.setCreateTime(LocalDateTime.now());// 设置用户创建时间
+        * employee.setUpdateTime(LocalDateTime.now());//设置更新时间
+
         // 获取登录者id，跟当时放入session中的名字要对应
-        employee.setCreateUser(employeeId);//设置创建人id
-        employee.setUpdateUser(employeeId);//设置更新人
+        * employee.setCreateUser(employeeId);//设置创建人id
+        * employee.setUpdateUser(employeeId);//设置更新人
+         **/
         employeeService.save(employee);
         return  R.success("新增员工成功！");
     }
@@ -128,6 +134,48 @@ public class EmployeeController {
         employeeService.page(pageinfo,queryWrapper);
 
         return R.success(pageinfo);
+    }
+
+    /**
+     * PutMapping是因为前端传来的是put格式
+     * 根据id修改员工信息
+     * @param request
+     * @param employee
+     * @return
+     */
+    @PutMapping
+    public R<String> update(HttpServletRequest request,@RequestBody Employee employee){
+        log.info("要更新的员工信息{}",employee.toString());
+        Long empId = (Long) request.getSession().getAttribute("employee");
+        /**
+         * 要注意长整型ID长度为19，而json使用16位，会对后三位进行取舍而丢失精度、
+         * 因此，服务端在传递回数据时需要将ID换位string传递
+         * 该功能用消息转换器实现
+         */
+        /**
+         * 这里使用自动填充去添加：首先Employee要设置填充声明，然后通过MyMetaObjectHandler 实现
+        employee.setUpdateTime(LocalDateTime.now());
+        employee.setUpdateUser(empId);
+         */
+        //employeeService调用map来更新数据
+        employeeService.updateById(employee);
+        return R.success("员工信息修改成功！");
+    }
+
+    /**
+     * PathVariable表示id是一个路径变量
+     * 根据id查询信息
+     * @param id
+     * @return
+     */
+    @GetMapping("/{id}")
+    public R<Employee> getById(@PathVariable Long id){
+        log.info("根据id查询员工信息...");
+        Employee employee=employeeService.getById(id);
+        if (employee!=null){
+            return R.success(employee);
+        }
+        return R.error("没有查询到员工信息");
     }
 
 }
