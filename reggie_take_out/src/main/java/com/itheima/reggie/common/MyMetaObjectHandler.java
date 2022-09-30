@@ -17,7 +17,8 @@ import java.time.LocalDateTime;
 @Slf4j
 public class MyMetaObjectHandler  implements MetaObjectHandler {
     /**
-     * 插入操作时自动填充
+     * 插入操作时自动填充，设置和获取当前用户的ID使用LocalThread的方法
+     * 具体原理可以看common下的两个说明
      * @param metaObject
      */
     @Override
@@ -26,8 +27,8 @@ public class MyMetaObjectHandler  implements MetaObjectHandler {
         log.info(metaObject.toString());
         metaObject.setValue("createTime", LocalDateTime.now());
         metaObject.setValue("updateTime", LocalDateTime.now());
-        metaObject.setValue("createUser", LocalDateTime.now());
-        metaObject.setValue("updateUser", LocalDateTime.now());
+        metaObject.setValue("createUser", BaseContext.GetCurrentId());
+        metaObject.setValue("updateUser", BaseContext.GetCurrentId());
 
     }
 
@@ -40,6 +41,6 @@ public class MyMetaObjectHandler  implements MetaObjectHandler {
         log.info("公共字段自动填充[update]...");
         log.info(metaObject.toString());
         metaObject.setValue("updateTime", LocalDateTime.now());
-        metaObject.setValue("updateUser", LocalDateTime.now());
+        metaObject.setValue("updateUser", BaseContext.GetCurrentId());
     }
 }
