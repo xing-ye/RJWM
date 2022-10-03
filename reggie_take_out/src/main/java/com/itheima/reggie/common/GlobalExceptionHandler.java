@@ -21,7 +21,8 @@ import java.sql.SQLIntegrityConstraintViolationException;
 public class GlobalExceptionHandler {
 
     /**
-     * 设置异常处理方法以及处理何种异常,下面为一个报错示例
+     * 捕获并处理 SQLIntegrityConstraintViolationException 异常
+     * 这里只是要处理上述异常中的形式如下面的一个异常
      * Duplicate entry 'zhangsan' for key 'idx_username'
      * @param ex
      * @return
@@ -38,4 +39,18 @@ public class GlobalExceptionHandler {
         }
         return R.error("未知错误");
     }
+
+    /**
+     * 捕获并处理自定义的CustomException异常
+     * 该异常只是包含一个
+     * @param ex
+     * @return
+     */
+    @ExceptionHandler(CustomException.class)
+    public R<String> exceptionHandler(CustomException ex){
+        log.error(ex.getMessage());
+        // 这样做是为了可以将异常报到前端页面
+        return R.error(ex.getMessage());
+    }
+
 }

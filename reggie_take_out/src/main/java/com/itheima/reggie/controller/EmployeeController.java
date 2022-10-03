@@ -16,6 +16,7 @@ import javax.servlet.http.HttpServletRequest;
 import java.time.LocalDateTime;
 
 /**
+ * 用户管理
  * @RestController是@ResponseBody和@Controller的组合注解。
  * Controller用于控制层，交付spring管理
  */
@@ -116,7 +117,7 @@ public class EmployeeController {
     public R<Page> page(int page,int pageSize,String name){
         log.info("page={},pageSize={},name={}",page,pageSize,name);
         // 构造分页构造器
-        Page pageinfo=new Page(page,pageSize);
+        Page pageInfo=new Page(page,pageSize);
 
 
         //构造条件构造器，如果需要使用name
@@ -131,9 +132,9 @@ public class EmployeeController {
         queryWrapper.orderByDesc(Employee::getUpdateTime);
 
         //执行查询,按照pageinfo的要求进行分页查询,这里不需要一个返回值，会自动的放入pageinfo里
-        employeeService.page(pageinfo,queryWrapper);
+        employeeService.page(pageInfo,queryWrapper);
 
-        return R.success(pageinfo);
+        return R.success(pageInfo);
     }
 
     /**
