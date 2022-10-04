@@ -12,6 +12,8 @@ import org.apache.commons.lang.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.List;
+
 /**
  * 分类管理
  * @RestController是@ResponseBody和@Controller的组合注解。
@@ -81,7 +83,7 @@ public class CategoryController {
     }
 
     /**
-     * 根据id修海分类信息
+     * 根据id修改分类信息
      * @param category
      * @return
      */
@@ -92,5 +94,23 @@ public class CategoryController {
         categoryService.updateById(category);
         return R.success("修改分类信息成功！");
 
+    }
+
+    /**
+     * 根据条件查询分类数据
+     * 这里主要是根据类别，以List返回菜品的列表或者套餐的列表
+     * @param category
+     * @return
+     */
+    @GetMapping("/list")
+    public R<List<Category>> list(Category category){
+        // 条件构造器
+        LambdaQueryWrapper<Category> queryWrapper=new LambdaQueryWrapper();
+        // 设置查询条件
+        queryWrapper.eq(category.getType()!=null, Category::getType,category.getType());
+        // 添加排序条件，以sort升序排序，然后如果sort相同在以更新时间，降序排序
+        queryWrapper.orderByAsc(Category::getSort).orderByDesc(Category::getUpdateTime);
+        List<Category> list = categoryService.list(queryWrapper);
+        return R.success(list);
     }
 }
