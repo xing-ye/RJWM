@@ -168,4 +168,23 @@ public class DishController {
         return R.success(list);
     }
 
+    /**
+     * 根据条件，这里主要是 categoryId
+     * 查询对应的菜品数据
+     * @param dish
+     * @return
+     */
+//    @GetMapping("/list")
+//    public R<List<Dish>> list(Dish dish){
+//
+//        LambdaQueryWrapper<Dish> queryWrapper=new LambdaQueryWrapper<>();
+//        // 根据 categoryId 查询对应的菜品信息
+//        queryWrapper.eq(dish.getCategoryId()!=null,Dish::getCategoryId,dish.getCategoryId());
+//        // 现根据sort升序排，再根据更新时间降序排
+//        queryWrapper.orderByAsc(Dish::getSort).orderByDesc(Dish::getUpdateTime);
+//
+//        List<Dish> dishList = dishService.list(queryWrapper);
+//
+//        return R.success(dishList);
+//    }
 }

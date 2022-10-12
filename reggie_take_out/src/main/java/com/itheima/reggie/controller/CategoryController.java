@@ -6,6 +6,7 @@ import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.itheima.reggie.common.R;
 import com.itheima.reggie.entity.Category;
 import com.itheima.reggie.entity.Employee;
+import com.itheima.reggie.entity.Setmeal;
 import com.itheima.reggie.service.CategoryService;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang.StringUtils;
@@ -17,6 +18,7 @@ import java.util.List;
 /**
  * 分类管理
  * @RestController是@ResponseBody和@Controller的组合注解。
+ * ResponseBody是表明，所有回复都以json的格式，并不是说接受的也都是
  * Controller用于控制层，交付spring管理
  */
 @Slf4j
@@ -113,4 +115,7 @@ public class CategoryController {
         List<Category> list = categoryService.list(queryWrapper);
         return R.success(list);
     }
+
+
+
 }
