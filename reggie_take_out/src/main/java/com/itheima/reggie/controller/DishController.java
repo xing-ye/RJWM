@@ -148,5 +148,24 @@ public class DishController {
         dishService.updateWithFlavor(dishDto);
         return R.success("修改菜品成功！");
     }
+    /**
+     * 根据条件查询分类数据
+     * 这里主要是根据类别，以List返回菜品的列表或者套餐的列表
+     * @param dish
+     * @return
+     */
+    @GetMapping("/list")
+    public R<List<Dish>> list(Dish dish){
+        // 条件构造器
+        LambdaQueryWrapper<Dish> queryWrapper=new LambdaQueryWrapper();
+        // 设置查询条件
+         queryWrapper.eq(dish.getCategoryId() != null, Dish::getCategoryId, dish.getCategoryId());
+         // 查询状态为1的，即启售状态的
+         queryWrapper.eq(Dish::getStatus,1);
+        // 添加排序条件，以sort升序排序，然后如果sort相同在以更新时间，降序排序
+        queryWrapper.orderByAsc(Dish::getSort).orderByDesc(Dish::getUpdateTime);
+        List<Dish> list = dishService.list(queryWrapper);
+        return R.success(list);
+    }
 
 }
