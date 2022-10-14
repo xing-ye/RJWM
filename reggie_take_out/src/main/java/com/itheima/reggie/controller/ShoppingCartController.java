@@ -33,7 +33,7 @@ public class ShoppingCartController {
         log.info("购物车数据:{}",shoppingCart);
 
         //设置用户id，指定当前是哪个用户的购物车数据
-        Long currentId = BaseContext.getCurrentId();
+        Long currentId = BaseContext.GetCurrentId();
         shoppingCart.setUserId(currentId);
 
         Long dishId = shoppingCart.getDishId();
@@ -79,7 +79,7 @@ public class ShoppingCartController {
         log.info("查看购物车...");
 
         LambdaQueryWrapper<ShoppingCart> queryWrapper = new LambdaQueryWrapper<>();
-        queryWrapper.eq(ShoppingCart::getUserId,BaseContext.getCurrentId());
+        queryWrapper.eq(ShoppingCart::getUserId,BaseContext.GetCurrentId());
         queryWrapper.orderByAsc(ShoppingCart::getCreateTime);
 
         List<ShoppingCart> list = shoppingCartService.list(queryWrapper);
@@ -96,7 +96,7 @@ public class ShoppingCartController {
         //SQL:delete from shopping_cart where user_id = ?
 
         LambdaQueryWrapper<ShoppingCart> queryWrapper = new LambdaQueryWrapper<>();
-        queryWrapper.eq(ShoppingCart::getUserId,BaseContext.getCurrentId());
+        queryWrapper.eq(ShoppingCart::getUserId,BaseContext.GetCurrentId());
 
         shoppingCartService.remove(queryWrapper);
 

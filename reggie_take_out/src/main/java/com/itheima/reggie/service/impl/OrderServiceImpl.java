@@ -42,7 +42,7 @@ public class OrderServiceImpl extends ServiceImpl<OrderMapper, Orders> implement
     @Transactional
     public void submit(Orders orders) {
         //获得当前用户id
-        Long userId = BaseContext.getCurrentId();
+        Long userId = BaseContext.GetCurrentId();
 
         //查询当前用户的购物车数据
         LambdaQueryWrapper<ShoppingCart> wrapper = new LambdaQueryWrapper<>();
