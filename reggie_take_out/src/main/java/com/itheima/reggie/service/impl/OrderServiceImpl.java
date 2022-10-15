@@ -66,8 +66,10 @@ public class OrderServiceImpl extends ServiceImpl<OrderMapper, Orders> implement
         long orderId = IdWorker.getId();//订单号
 
         AtomicInteger amount = new AtomicInteger(0);
+        // AtomicInteger 相当于在线程安全情况下的i++
 
         List<OrderDetail> orderDetails = shoppingCarts.stream().map((item) -> {
+            // 这里没有使用
             OrderDetail orderDetail = new OrderDetail();
             orderDetail.setOrderId(orderId);
             orderDetail.setNumber(item.getNumber());
@@ -78,6 +80,8 @@ public class OrderServiceImpl extends ServiceImpl<OrderMapper, Orders> implement
             orderDetail.setImage(item.getImage());
             orderDetail.setAmount(item.getAmount());
             amount.addAndGet(item.getAmount().multiply(new BigDecimal(item.getNumber())).intValue());
+            // multiply表示乘，即金额乘以数量，
+            // 在java.math包中提供的API类BigDecimal，用来对超过16位有效位的数进行精确的运算。
             return orderDetail;
         }).collect(Collectors.toList());
 

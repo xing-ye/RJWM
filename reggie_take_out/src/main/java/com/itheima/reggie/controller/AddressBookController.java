@@ -44,11 +44,11 @@ public class AddressBookController {
         log.info("addressBook:{}", addressBook);
         LambdaUpdateWrapper<AddressBook> wrapper = new LambdaUpdateWrapper<>();
         wrapper.eq(AddressBook::getUserId, BaseContext.GetCurrentId());
-        wrapper.set(AddressBook::getIsDefault, 0);
+        wrapper.set(AddressBook::getIsDefault, 0);// 为0表示不是默认地址，先将所有都设为0
         //SQL:update address_book set is_default = 0 where user_id = ?
         addressBookService.update(wrapper);
 
-        addressBook.setIsDefault(1);
+        addressBook.setIsDefault(1); // 将这个地址的设为1，即默认
         //SQL:update address_book set is_default = 1 where id = ?
         addressBookService.updateById(addressBook);
         return R.success(addressBook);
