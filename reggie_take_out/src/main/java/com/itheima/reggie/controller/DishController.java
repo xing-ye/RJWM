@@ -216,4 +216,27 @@ public class DishController {
 //
 //        return R.success(dishList);
 //    }
+
+    /**
+     * 更改停售状态
+     * @param status 为要更改为的状态 为1表示是要设为启售状态
+     * @param ids 要更改的dish的id们
+     * @return
+     */
+    @PostMapping("/status/{status}")
+    public R<String> status(@PathVariable("status") Integer status, @RequestParam List<Long> ids){
+        // 这里接受数组，前端传来的是以“，”分隔的数据，虽然没有以json的格式，但是为了可以接受正确，可以强制用RequestParam进行匹配
+        log.info("状态为{}，id为{}",status,ids.toString());
+        /**
+         * 还可以使用queryWrapper.in(ids!=null,Dish::getId,ids)
+         * 查询出所有的dish： List<Dish> list = dishService.list(queryWrapper);
+         * 注意不能用 queryWrapper.eq,这样是查询不出来的，关键还是对这些语句要够熟悉
+         */
+        for(Long id:ids){
+            Dish dish = dishService.getById(id);
+            dish.setStatus(status);
+            dishService.updateById(dish);
+        }
+        return R.success("状态更改成功！");
+    }
 }
