@@ -218,7 +218,9 @@ public class DishController {
 //    }
 
     /**
-     * 更改停售状态
+     * 批量更改停售状态
+     * 解@RequestParam接收的参数是来自HTTP请求体或请求url的QueryString中。
+     * 而@RequestBody接收的参数是来自requestBody中，即请求体。
      * @param status 为要更改为的状态 为1表示是要设为启售状态
      * @param ids 要更改的dish的id们
      * @return
@@ -238,5 +240,29 @@ public class DishController {
             dishService.updateById(dish);
         }
         return R.success("状态更改成功！");
+    }
+
+    /**
+     * 批量删除菜品,要同时删除菜品对应的口味信息
+     * 这里面接受的是url中的参数，所以用RequestParam
+     * @param ids
+     * @return
+     */
+    @DeleteMapping
+    public R<String> delete(@RequestParam List<Long> ids){
+        log.info("删除菜品id为{}",ids.toString());
+        // 删除菜品对应风味，dish_flavor表
+        LambdaQueryWrapper<DishFlavor> queryWrapper =new LambdaQueryWrapper<>();
+        queryWrapper.in(ids!=null,DishFlavor::getDishId,ids);
+        dishFlavorService.remove(queryWrapper);
+
+        // 删除菜品信息
+        if(!dishService.removeByIds(ids)){
+            return R.error("删除菜品信息失败！");
+        }
+
+        return R.success("删除菜品成功");
+
+        // 是不是要处理套餐里的菜品信息
     }
 }
