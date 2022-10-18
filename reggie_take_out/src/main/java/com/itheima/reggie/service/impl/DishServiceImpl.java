@@ -2,9 +2,12 @@ package com.itheima.reggie.service.impl;
 
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
+import com.itheima.reggie.common.CustomException;
 import com.itheima.reggie.dto.DishDto;
 import com.itheima.reggie.entity.Dish;
 import com.itheima.reggie.entity.DishFlavor;
+import com.itheima.reggie.entity.Setmeal;
+import com.itheima.reggie.entity.SetmealDish;
 import com.itheima.reggie.mapper.DishMapper;
 import com.itheima.reggie.service.DishFlavorService;
 import com.itheima.reggie.service.DishService;
@@ -100,6 +103,35 @@ public class DishServiceImpl extends ServiceImpl<DishMapper, Dish> implements Di
         }).collect(Collectors.toList());
 
         dishFlavorService.saveBatch(collect);
+
+    }
+
+    @Override
+    public void removeWithFlavor(List<Long> ids) {
+
+        LambdaQueryWrapper<Dish> queryWrapper=new LambdaQueryWrapper();
+
+        // 查询状态，确定是否可以删除(启售中的不能删除)
+        queryWrapper.in(Dish::getId,ids); // 判断是否在要删除的id中
+        queryWrapper.eq(Dish::getStatus,1); // 判断是否为启售状态(1)
+
+        // 如果不能删除，抛出业务异常
+        int count=this.count(queryWrapper);// 统计查询到的数据条数
+        if(count>0){
+            // 如果存在要删除的启售数据，抛出异常
+            throw new CustomException("菜品正在售卖中，不能删除！");
+            // 这里CustomException是我们自定义的异常，可以将信息展现到前端中
+        }
+
+        // 如果可以删除，先删除套餐中的数据--setmeal
+        this.removeByIds(ids);
+        // 删除关系表中的数据--dish_falvor
+        // 因为不能直接用removeByIds，因为这里传入的ids是套餐的id并不是setmeal_dish的主键值
+        //所以，可以使用下面的方法，利用查询的方式删除
+        LambdaQueryWrapper<DishFlavor> queryWrapper1=new LambdaQueryWrapper<>();
+        queryWrapper1.in(DishFlavor::getDishId,ids); // 找到所有getSetmealId在ids中的数据
+        dishFlavorService.remove(queryWrapper1);
+
 
     }
 }

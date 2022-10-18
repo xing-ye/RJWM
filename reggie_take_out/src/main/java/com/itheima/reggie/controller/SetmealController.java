@@ -3,9 +3,9 @@ package com.itheima.reggie.controller;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.itheima.reggie.common.R;
+import com.itheima.reggie.dto.DishDto;
 import com.itheima.reggie.dto.SetmealDto;
-import com.itheima.reggie.entity.Category;
-import com.itheima.reggie.entity.Setmeal;
+import com.itheima.reggie.entity.*;
 import com.itheima.reggie.service.CategoryService;
 import com.itheima.reggie.service.SetmealDishService;
 import com.itheima.reggie.service.SetmealService;
@@ -127,4 +127,48 @@ public class SetmealController {
 
         return R.success(list);
     }
+
+    /**
+     * PathVariable表示id是一个路径变量
+     * 根据id查询对应的套餐信息，用于修改时讲数据回应到页面
+     * @param id
+     * @return
+     */
+    @GetMapping("/{id}")
+    public R<SetmealDto> getById(@PathVariable Long id){
+        log.info("根据id查询套餐信息...");
+        SetmealDto setmealDto = setmealService.getByIdWithDishes(id);
+        if (setmealDto!=null){
+            return R.success(setmealDto);
+        }
+        return R.error("没有查询到套餐及对应菜品关系信息！");
+    }
+
+    /**
+     * 批量更改停售状态
+     * 解@RequestParam接收的参数是来自HTTP请求体或请求url的QueryString中。
+     * 而@RequestBody接收的参数是来自requestBody中，即请求体。
+     * @param status 为要更改为的状态 为1表示是要设为启售状态
+     * @param ids 要更改的dish的id们
+     * @return
+     */
+    @PostMapping("/status/{status}")
+    public R<String> status(@PathVariable("status") Integer status, @RequestParam List<Long> ids){
+        // 这里接受数组，前端传来的是以“，”分隔的数据，虽然没有以json的格式，但是为了可以接受正确，可以强制用RequestParam进行匹配
+        log.info("状态为{}，id为{}",status,ids.toString());
+        /**
+         * 还可以使用queryWrapper.in(ids!=null,Dish::getId,ids)
+         * 查询出所有的dish： List<Dish> list = dishService.list(queryWrapper);
+         * 注意不能用 queryWrapper.eq,这样是查询不出来的，关键还是对这些语句要够熟悉
+         */
+        for(Long id:ids){
+            Setmeal setmeal = setmealService.getById(id);
+            setmeal.setStatus(status);
+            setmealService.updateById(setmeal);
+        }
+        return R.success("状态更改成功！");
+    }
+
+
+
 }

@@ -4,6 +4,8 @@ import com.baomidou.mybatisplus.extension.service.IService;
 import com.itheima.reggie.dto.DishDto;
 import com.itheima.reggie.entity.Dish;
 
+import java.util.List;
+
 //    用户controller调用，以操作数据库
 public interface DishService extends IService<Dish> {
 
@@ -15,4 +17,10 @@ public interface DishService extends IService<Dish> {
 
     // 修改菜品，需要同时对口味表和菜品表进行更新
     public void updateWithFlavor(DishDto dishDto);
+
+    /**
+     * 删除菜品，同时删除菜品对应的口味信息
+     * @param ids
+     */
+    public void removeWithFlavor(List<Long> ids);
 }

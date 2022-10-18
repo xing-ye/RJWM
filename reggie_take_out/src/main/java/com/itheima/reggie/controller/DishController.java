@@ -130,7 +130,7 @@ public class DishController {
      */
     @GetMapping("/{id}")
     public R<DishDto> getById(@PathVariable Long id){
-        log.info("根据id查询员工信息...");
+        log.info("根据id查询菜品信息...");
         DishDto dishDto= dishService.getByIdWithFlavor(id);
         if (dishDto!=null){
             return R.success(dishDto);
@@ -250,19 +250,13 @@ public class DishController {
      */
     @DeleteMapping
     public R<String> delete(@RequestParam List<Long> ids){
-        log.info("删除菜品id为{}",ids.toString());
-        // 删除菜品对应风味，dish_flavor表
-        LambdaQueryWrapper<DishFlavor> queryWrapper =new LambdaQueryWrapper<>();
-        queryWrapper.in(ids!=null,DishFlavor::getDishId,ids);
-        dishFlavorService.remove(queryWrapper);
 
-        // 删除菜品信息
-        if(!dishService.removeByIds(ids)){
-            return R.error("删除菜品信息失败！");
-        }
+        log.info("删除菜品id为{}",ids.toString());
+
+        dishService.removeWithFlavor(ids);
 
         return R.success("删除菜品成功");
 
-        // 是不是要处理套餐里的菜品信息
+        // 是不是要处理套餐里的菜品信息?
     }
 }
