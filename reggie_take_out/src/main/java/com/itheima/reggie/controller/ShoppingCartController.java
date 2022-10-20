@@ -7,6 +7,7 @@ import com.itheima.reggie.entity.ShoppingCart;
 import com.itheima.reggie.service.ShoppingCartService;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.bind.annotation.*;
 
 import java.time.LocalDateTime;
@@ -101,5 +102,40 @@ public class ShoppingCartController {
         shoppingCartService.remove(queryWrapper);
 
         return R.success("清空购物车成功");
+    }
+
+    /**
+     * 客户端的套餐或者是菜品数量减少设置
+     * 没必要设置返回值
+     * @param shoppingCart
+     */
+    @PostMapping("/sub")
+    @Transactional
+    public R<ShoppingCart> sub(@RequestBody ShoppingCart shoppingCart){
+
+        Long dishId = shoppingCart.getDishId();
+        LambdaQueryWrapper<ShoppingCart> queryWrapper = new LambdaQueryWrapper<>();
+        //代表数量减少的是菜品数量
+        if (dishId != null){
+            //通过dishId查出购物车对象
+            queryWrapper.eq(ShoppingCart::getDishId,dishId);
+            ShoppingCart cart1 = shoppingCartService.getOne(queryWrapper);
+            cart1.setNumber(cart1.getNumber()-1);
+            //对数据进行更新操作
+            shoppingCartService.updateById(cart1);
+            return R.success(cart1);
+        }
+        Long setmealId = shoppingCart.getSetmealId();
+        if (setmealId != null){
+            //代表是套餐数量减少
+            queryWrapper.eq(ShoppingCart::getSetmealId,setmealId);
+            ShoppingCart cart2 = shoppingCartService.getOne(queryWrapper);
+            cart2.setNumber(cart2.getNumber()-1);
+            //对数据进行更新操作
+            shoppingCartService.updateById(cart2);
+            return R.success(cart2);
+        }
+
+        return R.error("操作异常");
     }
 }
